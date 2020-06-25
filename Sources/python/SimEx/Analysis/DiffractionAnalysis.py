@@ -207,6 +207,31 @@ class DiffractionAnalysis(AbstractAnalysis):
 
         self.__mask = val
 
+    def quatGenerator(self):
+        """ Yield an interator over the quaternion(s) of selected pattern(s) """
+        indices = self.pattern_indices
+        path = self.input_path
+        with h5py.File(path, 'r') as h5:
+            if indices is None or indices == 'all':
+                indices = [key for key in h5['data'].keys()]
+            else:
+                indices = ["%0.7d" % ix for ix in indices]
+            for ix in indices:
+                root_path = '/data/%s/'% (ix)
+                path_to_data = root_path + 'angle'
+
+                angle = h5[path_to_data].value
+                yield angle
+
+    @property
+    def quaternion(self):
+        qi = self.quatGenerator()
+        if len(self.pattern_indices) == 1:
+            quat = next(qi)
+        else:
+            quat = numpy.array([p for p in qi])
+
+        return quat
 
     def patternGenerator(self):
         """ Yield an iterator over a given pattern sequence from a diffraction file.
@@ -636,7 +661,7 @@ def plotResolutionRings(parameters,rings=(10, 5.0, 3.5),half=True):
     """
     Show resolution rings on current plot.
 
-    :param parameters: Parameters needed to construct the resolution rings.
+    :param parameters: Parameters needed to construct the resolution rings in Angstrom.
     :type parameters: dict
     :param rings: the rings shown on the figure
     :type rings: list
