@@ -44,6 +44,8 @@ def _getParallelResourceInfoFromSlurm():
     try:
         resource['NNodes'] = int(os.environ['SLURM_JOB_NUM_NODES'])
         uniq_nodes=os.environ['SLURM_JOB_CPUS_PER_NODE'].split(",")
+        print (os.environ['SLURM_JOB_CPUS_PER_NODE'])
+        print (uniq_nodes)
         # SLURM sets this variable to something like 40x(2),20x(1),10x(10). We extract ncores from this
         ncores=0
         for node in uniq_nodes:
@@ -54,6 +56,7 @@ def _getParallelResourceInfoFromSlurm():
             else:
                 cores=node[:ind-1]
                 mul=node[ind+1:node.find(")")]
+            print (cores,mul)
             ncores+=int(cores)*int(mul)
 
         resource['NCores'] = ncores
