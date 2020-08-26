@@ -171,12 +171,14 @@ class XMDYNDemoPhotonMatterInteractor(AbstractPhotonInteractor):
             pmi_demo.g_s2e['sys'] = dict()
             pmi_demo.g_s2e['setup']['num_digits'] = 7
 
+            pmi_demo.f_load_pulse( pmi_demo.g_s2e['prop_out'] )
+
             if 'number_of_steps' in list(self.parameters.keys()):
                 pmi_demo.g_s2e['steps'] = self.parameters['number_of_steps']
             else:
-                pmi_demo.g_s2e['steps'] = 100
+                pmi_demo.g_s2e['steps'] = pmi_demo.g_s2e['pulse']['nSlices']
 
-            pmi_demo.g_s2e['maxZ'] = 100
+            pmi_demo.g_s2e['maxZ'] = pmi_demo.g_s2e['pulse']['nSlices']
             pmi_demo.g_s2e['random_rotation'] = self.parameters['random_rotation']
             pmi_demo.g_s2e['setup']['pmi_out'] = output_file
             # Setup the database.
@@ -185,7 +187,6 @@ class XMDYNDemoPhotonMatterInteractor(AbstractPhotonInteractor):
             # Go through the pmi workflow.
             pmi_demo.f_init_random()
             pmi_demo.f_save_info()
-            pmi_demo.f_load_pulse( pmi_demo.g_s2e['prop_out'] )
 
             # Get file extension.
             extension = self.__sample_path.split(".")[-1]
@@ -504,13 +505,18 @@ class PMIDemo(object):
         dy = ( self.g_s2e['pulse']['yMax'] - self.g_s2e['pulse']['yMin'] ) / ( self.g_s2e['pulse']['ny'] * 1.0 )
         Eph = self.g_s2e['pulse']['photonEnergy'] * 1.0 ;
 
-        NPH = 0
+        NPH = []
+        # NPH = 0
         for tt in range( self.g_s2e['pulse']['nSlices'] ) :
-            NPH += ( sel_pixV[tt,0]**2 + sel_pixV[tt,1]**2 + sel_pixH[tt,0]**2 + sel_pixH[tt,1]**2 )
+            # NPH += ( sel_pixV[tt,0]**2 + sel_pixV[tt,1]**2 + sel_pixH[tt,0]**2 + sel_pixH[tt,1]**2 )
+            NPH_slice = ( sel_pixV[tt,0]**2 + sel_pixV[tt,1]**2 + sel_pixH[tt,0]**2 + sel_pixH[tt,1]**2 )
+            NPH_slice *= 1e6 *  dt * self.g_s2e['pulse']['xFWHM'] * self.g_s2e['pulse']['yFWHM'] / ( Eph * 1.6022e-19 )
+            NPH.append(NPH_slice)
 
-        NPH *= 1e6 *  dt * self.g_s2e['pulse']['xFWHM'] * self.g_s2e['pulse']['yFWHM'] / ( Eph * 1.6022e-19 )
+        # NPH *= 1e6 *  dt * self.g_s2e['pulse']['xFWHM'] * self.g_s2e['pulse']['yFWHM'] / ( Eph * 1.6022e-19 )
 
-        self.g_s2e['pulse']['sel_int'] = numpy.ones( (self.g_s2e['steps'],) ) * ( NPH / (1.0*self.g_s2e['steps']) )
+        # self.g_s2e['pulse']['sel_int'] = numpy.ones( (self.g_s2e['steps'],) ) * ( NPH / (1.0*self.g_s2e['steps']) )
+        self.g_s2e['pulse']['sel_int'] = numpy.array(NPH)
 
     #    print self.g_s2e['pulse']['arrEhor'].shape , dt , dx , dy ,  NPH
 
