@@ -41,10 +41,11 @@ dependencies:
   - pyfftw
   - pyFAI
   - numba
+  - tbb
   - pint
   - py3nvml
   - openpmd-api
-  - python>=3.5
+  - python>=3.6
   - nomkl
   - cfelpyutils
   - pip

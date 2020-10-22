@@ -7,6 +7,7 @@ matplotlib>=1.5.1
 mpi4py
 numba
 numpy>=1.18.1
+tbb
 openpmd-api
 periodictable>=1.4.1
 pint
